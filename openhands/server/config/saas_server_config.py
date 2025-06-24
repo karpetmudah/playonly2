@@ -24,10 +24,14 @@ class SaaSServerConfig(ServerConfig):
 
     def verify_config(self):
         """Verify SaaS configuration"""
-        required_env_vars = [
-            'MONGODB_URL',
-            'JWT_SECRET_KEY',
-        ]
+        # Allow memory user store for testing
+        if self.user_store_class == 'openhands.storage.user.memory_user_store.MemoryUserStore':
+            required_env_vars = ['JWT_SECRET_KEY']
+        else:
+            required_env_vars = [
+                'MONGODB_URL',
+                'JWT_SECRET_KEY',
+            ]
 
         missing_vars = []
         for var in required_env_vars:

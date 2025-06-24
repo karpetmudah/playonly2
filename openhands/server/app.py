@@ -64,9 +64,10 @@ app = FastAPI(
 # Include auth router only in SaaS mode
 if os.getenv('OPENHANDS_CONFIG_CLS', '').endswith('SaaSServerConfig'):
     try:
-        from openhands.server.routes.auth import app as auth_api_router
+        from openhands.server.routes.auth import app as auth_api_router, authenticate_app
 
         app.include_router(auth_api_router)
+        app.include_router(authenticate_app)
     except ImportError as e:
         print(f'Warning: Could not load auth routes in SaaS mode: {e}')
 app.include_router(public_api_router)

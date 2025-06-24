@@ -178,20 +178,34 @@ export default function MainApp() {
     setLoginMethodExists(checkLoginMethodExists());
   }, [isAuthed, checkLoginMethodExists]);
 
+  // Redirect to auth page if not authenticated in SaaS mode
+  React.useEffect(() => {
+    if (
+      !isAuthed &&
+      !isAuthError &&
+      !isFetchingAuth &&
+      !isOnTosPage &&
+      config.data?.APP_MODE === "saas" &&
+      pathname !== "/auth"
+    ) {
+      navigate("/auth");
+    }
+  }, [isAuthed, isAuthError, isFetchingAuth, isOnTosPage, config.data?.APP_MODE, pathname, navigate]);
+
   const renderAuthModal =
     !isAuthed &&
     !isAuthError &&
     !isFetchingAuth &&
     !isOnTosPage &&
-    config.data?.APP_MODE === "saas" &&
-    !loginMethodExists; // Don't show auth modal if login method exists in local storage
+    config.data?.APP_MODE === "oss" &&
+    !loginMethodExists; // Only show auth modal for OSS mode
 
   const renderReAuthModal =
     !isAuthed &&
     !isAuthError &&
     !isFetchingAuth &&
     !isOnTosPage &&
-    config.data?.APP_MODE === "saas" &&
+    config.data?.APP_MODE === "oss" &&
     loginMethodExists;
 
   return (

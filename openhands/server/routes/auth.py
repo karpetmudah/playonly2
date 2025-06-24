@@ -16,6 +16,20 @@ from openhands.storage.data_models.user import (
 app = APIRouter(prefix='/api/auth', tags=['authentication'])
 auth_service = AuthService()
 
+# Add a general authenticate endpoint for compatibility
+authenticate_app = APIRouter(prefix='/api', tags=['authentication'])
+
+
+@authenticate_app.post('/authenticate')
+async def authenticate(user_auth=Depends(get_user_auth)):
+    """Check if user is authenticated (for frontend compatibility)"""
+    user_id = await user_auth.get_user_id()
+    if not user_id:
+        raise HTTPException(
+            status_code=status.HTTP_401_UNAUTHORIZED, detail='Authentication required'
+        )
+    return {'authenticated': True, 'user_id': user_id}
+
 
 @app.post('/register', response_model=TokenResponse)
 async def register(user_data: UserRegistration):
