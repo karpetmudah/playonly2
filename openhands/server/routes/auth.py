@@ -19,6 +19,9 @@ auth_service = AuthService()
 # Add a general authenticate endpoint for compatibility
 authenticate_app = APIRouter(prefix='/api', tags=['authentication'])
 
+# Add billing compatibility routes under /api/billing for frontend compatibility
+billing_app = APIRouter(prefix='/api/billing', tags=['billing'])
+
 
 @authenticate_app.post('/authenticate')
 async def authenticate(user_auth=Depends(get_user_auth)):
@@ -142,6 +145,37 @@ async def get_billing_credits(user_auth=Depends(get_user_auth)):
 @app.post('/billing/create-customer-setup-session')
 async def create_customer_setup_session(user_auth=Depends(get_user_auth)):
     """Create a customer setup session for billing (placeholder for Stripe integration)"""
+    user_id = await user_auth.get_user_id()
+    if not user_id:
+        raise HTTPException(
+            status_code=status.HTTP_401_UNAUTHORIZED, detail='Authentication required'
+        )
+    
+    # This is a placeholder for Stripe customer setup session creation
+    # In a real implementation, you would integrate with Stripe API
+    return {
+        'setup_session_url': 'https://checkout.stripe.com/setup/placeholder',
+        'message': 'Billing setup session created (placeholder)'
+    }
+
+
+# Billing compatibility endpoints under /api/billing/ for frontend compatibility
+@billing_app.get('/credits')
+async def get_billing_credits_compat(user_auth=Depends(get_user_auth)):
+    """Get current user's credit balance (compatibility endpoint)"""
+    user_id = await user_auth.get_user_id()
+    if not user_id:
+        raise HTTPException(
+            status_code=status.HTTP_401_UNAUTHORIZED, detail='Authentication required'
+        )
+
+    credits = await auth_service.get_user_credits(user_id)
+    return {'credits': str(credits)}
+
+
+@billing_app.post('/create-customer-setup-session')
+async def create_customer_setup_session_compat(user_auth=Depends(get_user_auth)):
+    """Create a customer setup session for billing (compatibility endpoint)"""
     user_id = await user_auth.get_user_id()
     if not user_id:
         raise HTTPException(
