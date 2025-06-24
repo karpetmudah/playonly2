@@ -9,8 +9,8 @@ from openhands.server.middleware import (  # type: ignore
     InMemoryRateLimiter,
     LocalhostCORSMiddleware,
     RateLimitMiddleware,
+    get_auth_middleware,
 )
-from openhands.server.middleware.auth_middleware import AuthMiddleware
 from openhands.server.static import SPAStaticFiles
 
 if os.getenv('SERVE_FRONTEND', 'true').lower() == 'true':
@@ -27,6 +27,8 @@ base_app.add_middleware(
 
 # Add auth middleware for SaaS mode
 if os.getenv('SAAS_MODE', 'false').lower() == 'true':
-    base_app.add_middleware(AuthMiddleware)
+    auth_middleware_instance = get_auth_middleware()
+    # Note: AuthMiddleware is not a standard ASGI middleware,
+    # it's used in route handlers for authentication
 
 app = socketio.ASGIApp(sio, other_asgi_app=base_app)

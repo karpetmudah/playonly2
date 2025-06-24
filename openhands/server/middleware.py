@@ -132,3 +132,93 @@ class RateLimitMiddleware(BaseHTTPMiddleware):
             return False
         # Put Other non rate limited checks here
         return True
+
+
+class AuthMiddleware:
+    """Authentication middleware for SaaS mode"""
+
+    def __init__(self):
+        # Import here to avoid circular imports
+        from openhands.server.services.auth_service import AuthService
+
+        self.auth_service = AuthService()
+        self.is_saas_mode = os.getenv('OPENHANDS_CONFIG_CLS', '').endswith(
+            'SaaSServerConfig'
+        )
+
+    async def get_current_user(self, request: Request, credentials=None) -> str | None:
+        """
+        Extract user ID from JWT token if in SaaS mode
+
+        Returns:
+            str: User ID if authenticated in SaaS mode
+            None: If not in SaaS mode or not authenticated
+        """
+        if not self.is_saas_mode:
+            return None
+
+        if not credentials:
+            return None
+
+        try:
+            user_id = await self.auth_service.verify_token(credentials.credentials)
+            return user_id
+        except Exception:
+            return None
+
+    async def require_auth(self, request: Request, credentials=None) -> str:
+        """
+        Require authentication in SaaS mode
+
+        Returns:
+            str: User ID
+
+        Raises:
+            HTTPException: If not authenticated in SaaS mode
+        """
+        from fastapi import HTTPException, status
+
+        if not self.is_saas_mode:
+            raise HTTPException(
+                status_code=status.HTTP_400_BAD_REQUEST,
+                detail='Authentication not required in non-SaaS mode',
+            )
+
+        if not credentials:
+            raise HTTPException(
+                status_code=status.HTTP_401_UNAUTHORIZED,
+                detail='Authentication required',
+                headers={'WWW-Authenticate': 'Bearer'},
+            )
+
+        try:
+            user_id = await self.auth_service.verify_token(credentials.credentials)
+            return user_id
+        except Exception as e:
+            raise HTTPException(
+                status_code=status.HTTP_401_UNAUTHORIZED,
+                detail=f'Invalid authentication credentials: {str(e)}',
+                headers={'WWW-Authenticate': 'Bearer'},
+            )
+
+    def get_user_workspace_path(self, user_id: str) -> str:
+        """Get the workspace path for a specific user"""
+        return f'/workspaces/user_{user_id}'
+
+    def ensure_user_workspace(self, user_id: str) -> str:
+        """Ensure user workspace directory exists and return path"""
+        workspace_path = self.get_user_workspace_path(user_id)
+        os.makedirs(workspace_path, exist_ok=True)
+        return workspace_path
+
+
+# Global instance - lazy initialization to avoid import issues
+auth_middleware = None
+
+
+def get_auth_middleware() -> AuthMiddleware:
+    """Get the global auth middleware instance, creating it if needed"""
+    global auth_middleware
+    if auth_middleware is None:
+        auth_middleware = AuthMiddleware()
+    return auth_middleware

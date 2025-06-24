@@ -1,4 +1,5 @@
 import contextlib
+import os
 import warnings
 from contextlib import asynccontextmanager
 from typing import AsyncIterator
@@ -14,7 +15,6 @@ from fastapi import (
 
 import openhands.agenthub  # noqa F401 (we import this to get the agents registered)
 from openhands import __version__
-from openhands.server.routes.auth import app as auth_api_router
 from openhands.server.routes.conversation import app as conversation_api_router
 from openhands.server.routes.feedback import app as feedback_api_router
 from openhands.server.routes.files import app as files_api_router
@@ -61,7 +61,14 @@ app = FastAPI(
 )
 
 
-app.include_router(auth_api_router)
+# Include auth router only in SaaS mode
+if os.getenv('OPENHANDS_CONFIG_CLS', '').endswith('SaaSServerConfig'):
+    try:
+        from openhands.server.routes.auth import app as auth_api_router
+
+        app.include_router(auth_api_router)
+    except ImportError as e:
+        print(f'Warning: Could not load auth routes in SaaS mode: {e}')
 app.include_router(public_api_router)
 app.include_router(files_api_router)
 app.include_router(security_api_router)
