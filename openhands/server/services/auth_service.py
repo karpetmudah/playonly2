@@ -1,13 +1,13 @@
 from __future__ import annotations
 
 import os
+from typing import TYPE_CHECKING
 
 import bcrypt
 import jwt
 from fastapi import HTTPException, status
 
 from openhands.core.logger import openhands_logger as logger
-from openhands.server.user_auth.saas_user_auth import create_access_token
 from openhands.storage.data_models.user import (
     TokenResponse,
     UserLogin,
@@ -17,6 +17,9 @@ from openhands.storage.data_models.user import (
 )
 from openhands.storage.user.user_store import UserStore
 from openhands.utils.import_utils import get_impl
+
+if TYPE_CHECKING:
+    pass
 
 
 class AuthService:
@@ -72,6 +75,8 @@ class AuthService:
                 await self._create_user_workspace(user.user_id, user.workspace_path)
 
             # Create access token
+            from openhands.server.user_auth.saas_user_auth import create_access_token
+
             access_token = create_access_token(user.user_id, user.email)
 
             # Update last login
@@ -125,6 +130,8 @@ class AuthService:
             )
 
         # Create access token
+        from openhands.server.user_auth.saas_user_auth import create_access_token
+
         access_token = create_access_token(user.user_id, user.email)
 
         # Update last login

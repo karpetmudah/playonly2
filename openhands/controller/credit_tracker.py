@@ -1,10 +1,13 @@
 from __future__ import annotations
 
 import os
+from typing import TYPE_CHECKING
 
 from openhands.core.logger import openhands_logger as logger
 from openhands.llm.metrics import TokenUsage
-from openhands.server.services.credit_service import CreditService
+
+if TYPE_CHECKING:
+    from openhands.server.services.credit_service import CreditService
 
 
 class CreditTracker:
@@ -12,12 +15,26 @@ class CreditTracker:
 
     def __init__(self, user_id: str | None = None):
         self.user_id = user_id
-        self.credit_service = CreditService() if user_id else None
+        self.credit_service: CreditService | None = None
         self.is_saas_mode = os.getenv('OPENHANDS_CONFIG_CLS', '').endswith(
             'SaaSServerConfig'
         )
         self.total_tokens_used = 0
         self.total_cost_deducted = 0.0
+
+        # Lazy initialization of credit service to avoid circular imports
+        if user_id and self.is_saas_mode:
+            self._init_credit_service()
+
+    def _init_credit_service(self) -> None:
+        """Lazy initialization of credit service to avoid circular imports"""
+        try:
+            from openhands.server.services.credit_service import CreditService
+
+            self.credit_service = CreditService()
+        except ImportError as e:
+            logger.warning(f'Could not initialize credit service: {e}')
+            self.credit_service = None
 
     async def track_token_usage(
         self,
