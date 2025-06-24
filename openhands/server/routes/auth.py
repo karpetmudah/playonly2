@@ -117,7 +117,15 @@ async def add_credits(amount: float, user_auth=Depends(get_user_auth)):
     return {'message': f'Successfully added {amount} credits'}
 
 
-# Billing endpoint for compatibility with existing frontend
+@app.post('/logout')
+async def logout(user_auth=Depends(get_user_auth)):
+    """Logout a user (invalidate token on client side)"""
+    # In JWT-based auth, logout is typically handled client-side by removing the token
+    # For server-side token invalidation, we would need a token blacklist
+    return {'message': 'Logged out successfully'}
+
+
+# Billing endpoints for compatibility with existing frontend
 @app.get('/billing/credits')
 async def get_billing_credits(user_auth=Depends(get_user_auth)):
     """Get current user's credit balance (billing endpoint for frontend compatibility)"""
@@ -129,3 +137,20 @@ async def get_billing_credits(user_auth=Depends(get_user_auth)):
 
     credits = await auth_service.get_user_credits(user_id)
     return {'credits': str(credits)}
+
+
+@app.post('/billing/create-customer-setup-session')
+async def create_customer_setup_session(user_auth=Depends(get_user_auth)):
+    """Create a customer setup session for billing (placeholder for Stripe integration)"""
+    user_id = await user_auth.get_user_id()
+    if not user_id:
+        raise HTTPException(
+            status_code=status.HTTP_401_UNAUTHORIZED, detail='Authentication required'
+        )
+    
+    # This is a placeholder for Stripe customer setup session creation
+    # In a real implementation, you would integrate with Stripe API
+    return {
+        'setup_session_url': 'https://checkout.stripe.com/setup/placeholder',
+        'message': 'Billing setup session created (placeholder)'
+    }
