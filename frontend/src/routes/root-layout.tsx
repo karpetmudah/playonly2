@@ -86,6 +86,7 @@ export default function MainApp() {
   const effectiveGitHubAuthUrl = isOnTosPage ? null : gitHubAuthUrl;
 
   const [consentFormIsOpen, setConsentFormIsOpen] = React.useState(false);
+  const [paymentModalDismissed, setPaymentModalDismissed] = React.useState(false);
 
   // Auto-login if login method is stored in local storage
   useAutoLogin();
@@ -241,7 +242,12 @@ export default function MainApp() {
 
       {config.data?.FEATURE_FLAGS.ENABLE_BILLING &&
         config.data?.APP_MODE === "saas" &&
-        settings?.IS_NEW_USER && <SetupPaymentModal />}
+        settings?.IS_NEW_USER &&
+        !paymentModalDismissed && (
+          <SetupPaymentModal
+            onClose={() => setPaymentModalDismissed(true)}
+          />
+        )}
     </div>
   );
 }

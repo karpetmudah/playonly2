@@ -8,7 +8,11 @@ import OpenHands from "#/api/open-hands";
 import { BrandButton } from "../settings/brand-button";
 import { displayErrorToast } from "#/utils/custom-toast-handlers";
 
-export function SetupPaymentModal() {
+interface SetupPaymentModalProps {
+  onClose?: () => void;
+}
+
+export function SetupPaymentModal({ onClose }: SetupPaymentModalProps) {
   const { t } = useTranslation();
   const { mutate, isPending } = useMutation({
     mutationFn: OpenHands.createBillingSessionResponse,
@@ -23,6 +27,28 @@ export function SetupPaymentModal() {
   return (
     <ModalBackdrop>
       <ModalBody className="border border-tertiary">
+        {onClose && (
+          <button
+            type="button"
+            onClick={onClose}
+            className="absolute top-4 right-4 text-gray-400 hover:text-gray-600 transition-colors"
+            aria-label="Close modal"
+          >
+            <svg
+              className="w-6 h-6"
+              fill="none"
+              stroke="currentColor"
+              viewBox="0 0 24 24"
+            >
+              <path
+                strokeLinecap="round"
+                strokeLinejoin="round"
+                strokeWidth={2}
+                d="M6 18L18 6M6 6l12 12"
+              />
+            </svg>
+          </button>
+        )}
         <AllHandsLogo width={68} height={46} />
         <div className="flex flex-col gap-2 w-full items-center text-center">
           <h1 className="text-2xl font-bold">
@@ -35,16 +61,29 @@ export function SetupPaymentModal() {
             />
           </p>
         </div>
-        <BrandButton
-          testId="proceed-to-stripe-button"
-          type="submit"
-          variant="primary"
-          className="w-full"
-          isDisabled={isPending}
-          onClick={mutate}
-        >
-          {t(I18nKey.BILLING$PROCEED_TO_STRIPE)}
-        </BrandButton>
+        <div className="flex flex-col gap-2 w-full">
+          <BrandButton
+            testId="proceed-to-stripe-button"
+            type="submit"
+            variant="primary"
+            className="w-full"
+            isDisabled={isPending}
+            onClick={mutate}
+          >
+            {t(I18nKey.BILLING$PROCEED_TO_STRIPE)}
+          </BrandButton>
+          {onClose && (
+            <BrandButton
+              testId="skip-payment-button"
+              type="button"
+              variant="secondary"
+              className="w-full"
+              onClick={onClose}
+            >
+              {t(I18nKey.BILLING$SKIP_FOR_NOW)}
+            </BrandButton>
+          )}
+        </div>
       </ModalBody>
     </ModalBackdrop>
   );

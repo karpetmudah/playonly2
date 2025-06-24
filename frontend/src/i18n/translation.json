@@ -7631,6 +7631,22 @@
         "de": "Du bist dabei! Du kannst jetzt deine $50 an kostenlosen Guthaben nutzen.",
         "uk": "Готово! Ви можете почати використовувати свої безкоштовні кредити на суму 50 доларів США вже зараз."
     },
+    "BILLING$SKIP_FOR_NOW": {
+        "en": "Skip for now",
+        "ja": "今はスキップ",
+        "zh-CN": "暂时跳过",
+        "zh-TW": "暫時跳過",
+        "ko-KR": "지금은 건너뛰기",
+        "no": "Hopp over for nå",
+        "it": "Salta per ora",
+        "pt": "Pular por agora",
+        "es": "Omitir por ahora",
+        "ar": "تخطي الآن",
+        "fr": "Ignorer pour l'instant",
+        "tr": "Şimdilik atla",
+        "de": "Vorerst überspringen",
+        "uk": "Поки що пропустити"
+    },
     "PAYMENT$ADD_FUNDS": {
         "en": "Add Funds",
         "ja": "資金を追加",

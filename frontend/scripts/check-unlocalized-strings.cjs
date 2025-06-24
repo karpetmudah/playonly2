@@ -173,6 +173,9 @@ function isCommonDevelopmentString(str) {
     // CSS and styling patterns
     /^[a-z0-9-]+:[a-z0-9-]+$/, // CSS property:value
     /^[a-z0-9-]+:[a-z0-9-]+;[a-z0-9-]+:[a-z0-9-]+$/, // Multiple CSS properties
+    
+    // SVG path data
+    /^[MLHVCSQTAZmlhvcsqtaz0-9\s.,\-]+$/, // SVG path commands
   ];
 
   // File extensions and media types
