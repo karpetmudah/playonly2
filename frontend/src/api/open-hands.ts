@@ -351,7 +351,7 @@ class OpenHands {
 
   static async getBalance(): Promise<string> {
     const { data } = await openHands.get<{ credits: string }>(
-      "/api/billing/credits",
+      "/api/auth/billing/credits",
     );
     return data.credits;
   }
@@ -400,9 +400,112 @@ class OpenHands {
     return data;
   }
 
+  static async register(userData: {
+    email: string;
+    password: string;
+    full_name?: string;
+  }): Promise<{
+    access_token: string;
+    token_type: string;
+    expires_in: number;
+    user: {
+      user_id: string;
+      email: string;
+      full_name?: string;
+      is_active: boolean;
+      is_verified: boolean;
+      credits: number;
+      total_credits_purchased: number;
+      total_credits_used: number;
+      created_at: string;
+      last_login?: string;
+    };
+  }> {
+    const { data } = await openHands.post("/api/auth/register", userData);
+    return data;
+  }
+
+  static async login(credentials: {
+    email: string;
+    password: string;
+  }): Promise<{
+    access_token: string;
+    token_type: string;
+    expires_in: number;
+    user: {
+      user_id: string;
+      email: string;
+      full_name?: string;
+      is_active: boolean;
+      is_verified: boolean;
+      credits: number;
+      total_credits_purchased: number;
+      total_credits_used: number;
+      created_at: string;
+      last_login?: string;
+    };
+  }> {
+    const { data } = await openHands.post("/api/auth/login", credentials);
+    return data;
+  }
+
+  static async getUserProfile(): Promise<{
+    user_id: string;
+    email: string;
+    full_name?: string;
+    is_active: boolean;
+    is_verified: boolean;
+    credits: number;
+    total_credits_purchased: number;
+    total_credits_used: number;
+    created_at: string;
+    last_login?: string;
+  }> {
+    const { data } = await openHands.get("/api/auth/profile");
+    return data;
+  }
+
+  static async updateUserProfile(profileData: {
+    full_name?: string;
+    email?: string;
+  }): Promise<{
+    user_id: string;
+    email: string;
+    full_name?: string;
+    is_active: boolean;
+    is_verified: boolean;
+    credits: number;
+    total_credits_purchased: number;
+    total_credits_used: number;
+    created_at: string;
+    last_login?: string;
+  }> {
+    const { data } = await openHands.put("/api/auth/profile", profileData);
+    return data;
+  }
+
+  static async getUserCredits(): Promise<{ credits: string }> {
+    const { data } = await openHands.get("/api/auth/credits");
+    return data;
+  }
+
+  static async addCredits(amount: number): Promise<{ message: string }> {
+    const { data } = await openHands.post("/api/auth/credits/add", null, {
+      params: { amount },
+    });
+    return data;
+  }
+
   static async logout(appMode: GetConfigResponse["APP_MODE"]): Promise<void> {
     const endpoint =
       appMode === "saas" ? "/api/logout" : "/api/unset-provider-tokens";
+
+    // Clear local storage for SaaS mode
+    if (appMode === "saas") {
+      localStorage.removeItem("auth_token");
+      localStorage.removeItem("user_data");
+    }
+
     await openHands.post(endpoint);
   }
 

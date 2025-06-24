@@ -62,11 +62,23 @@ conversation_manager = ConversationManagerImpl.get_instance(
     sio, config, file_store, server_config, monitoring_listener
 )
 
-SettingsStoreImpl = get_impl(SettingsStore, server_config.settings_store_class)
+# For SaaS mode, we use user-specific store implementations
+if hasattr(server_config, 'app_mode') and server_config.app_mode.value == 'saas':
+    from openhands.storage.conversation.user_file_conversation_store import (
+        UserFileConversationStore,
+    )
+    from openhands.storage.secrets.user_file_secrets_store import UserFileSecretsStore
+    from openhands.storage.settings.user_file_settings_store import (
+        UserFileSettingsStore,
+    )
 
-SecretsStoreImpl = get_impl(SecretsStore, server_config.secret_store_class)
-
-ConversationStoreImpl = get_impl(
-    ConversationStore,
-    server_config.conversation_store_class,
-)
+    SettingsStoreImpl: type[SettingsStore] = UserFileSettingsStore  # type: ignore
+    SecretsStoreImpl: type[SecretsStore] = UserFileSecretsStore  # type: ignore
+    ConversationStoreImpl: type[ConversationStore] = UserFileConversationStore  # type: ignore
+else:
+    SettingsStoreImpl = get_impl(SettingsStore, server_config.settings_store_class)
+    SecretsStoreImpl = get_impl(SecretsStore, server_config.secret_store_class)
+    ConversationStoreImpl = get_impl(
+        ConversationStore,
+        server_config.conversation_store_class,
+    )

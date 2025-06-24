@@ -76,6 +76,11 @@ python-pptx = "*"
 pylatexenc = "*"
 python-docx = "*"
 bashlex = "^0.18"
+# SaaS Multi-tenant dependencies
+motor = "^3.6.0"           # Async MongoDB driver
+pymongo = "^4.10.1"        # MongoDB driver
+bcrypt = "^4.2.1"          # Password hashing
+email-validator = "^2.2.0" # Email validation
 
 # TODO: These are integrations that should probably be optional
 redis = ">=5.2,<7.0"

@@ -4,6 +4,20 @@ export const openHands = axios.create({
   baseURL: `${window.location.protocol}//${import.meta.env.VITE_BACKEND_BASE_URL || window?.location.host}`,
 });
 
+// Add request interceptor to include auth token
+openHands.interceptors.request.use(
+  (config) => {
+    const token = localStorage.getItem("auth_token");
+    if (token) {
+      config.headers.Authorization = `Bearer ${token}`;
+    }
+    return config;
+  },
+  (error) => {
+    return Promise.reject(error);
+  }
+);
+
 // Helper function to check if a response contains an email verification error
 // eslint-disable-next-line @typescript-eslint/no-explicit-any
 const checkForEmailVerificationError = (data: any): boolean => {

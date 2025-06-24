@@ -23,6 +23,7 @@ from litellm.exceptions import (  # noqa
 )
 
 from openhands.controller.agent import Agent
+from openhands.controller.credit_tracker import CreditTracker
 from openhands.controller.replay import ReplayManager
 from openhands.controller.state.state import State
 from openhands.controller.state.state_tracker import StateTracker
@@ -174,6 +175,9 @@ class AgentController:
 
         # replay-related
         self._replay_manager = ReplayManager(replay_events)
+
+        # Credit tracking for SaaS mode
+        self.credit_tracker = CreditTracker(user_id=user_id)
 
         # Add the system message to the event stream
         self._add_system_message()
@@ -1181,12 +1185,22 @@ class AgentController:
 
         action.llm_metrics = metrics
 
-        # Log the metrics information for debugging
-        # Get the latest usage directly from the agent's metrics
+        # Track credit usage for SaaS mode
         latest_usage = None
         if self.state.metrics.token_usages:
             latest_usage = self.state.metrics.token_usages[-1]
 
+            # Track credits asynchronously (don't block the main flow)
+            if latest_usage and self.credit_tracker:
+                asyncio.create_task(
+                    self.credit_tracker.track_token_usage(
+                        latest_usage,
+                        model_name=agent_metrics.model_name,
+                        task_description=f'Agent action: {type(action).__name__}',
+                    )
+                )
+
+        # Log the metrics information for debugging
         accumulated_usage = self.state.metrics.accumulated_token_usage
         self.log(
             'debug',
