@@ -62,7 +62,7 @@ class MongoDBUserStore(UserStore):
         db = await self._get_database()
 
         user_id = str(uuid.uuid4())
-        workspace_path = f'/workspaces/user_{user_id}'
+        workspace_path = f'/tmp/openhands/user_{user_id}'
 
         user = User(
             user_id=user_id,

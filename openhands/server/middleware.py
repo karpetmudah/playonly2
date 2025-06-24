@@ -203,7 +203,7 @@ class AuthMiddleware:
 
     def get_user_workspace_path(self, user_id: str) -> str:
         """Get the workspace path for a specific user"""
-        return f'/workspaces/user_{user_id}'
+        return f'/tmp/openhands/user_{user_id}'
 
     def ensure_user_workspace(self, user_id: str) -> str:
         """Ensure user workspace directory exists and return path"""

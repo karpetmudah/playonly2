@@ -13,8 +13,8 @@ class UserFileSettingsStore(FileSettingsStore):
         self.user_id = user_id
 
         if user_id:
-            # Create user-specific settings directory
-            user_settings_dir = f'/workspaces/user_{user_id}/.openhands'
+            # Create user-specific settings directory in writable location
+            user_settings_dir = f'/tmp/openhands/user_{user_id}/.openhands'
             os.makedirs(user_settings_dir, exist_ok=True)
             settings_file = os.path.join(user_settings_dir, 'settings.json')
         else:

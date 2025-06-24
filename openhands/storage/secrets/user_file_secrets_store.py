@@ -13,8 +13,8 @@ class UserFileSecretsStore(FileSecretsStore):
         self.user_id = user_id
 
         if user_id:
-            # Create user-specific secrets directory
-            user_secrets_dir = f'/workspaces/user_{user_id}/.openhands'
+            # Create user-specific secrets directory in writable location
+            user_secrets_dir = f'/tmp/openhands/user_{user_id}/.openhands'
             os.makedirs(user_secrets_dir, exist_ok=True)
             secrets_file = os.path.join(user_secrets_dir, 'secrets.json')
         else:

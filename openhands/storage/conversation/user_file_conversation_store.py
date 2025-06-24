@@ -13,9 +13,9 @@ class UserFileConversationStore(FileConversationStore):
         self.user_id = user_id
 
         if user_id:
-            # Create user-specific conversations directory
+            # Create user-specific conversations directory in writable location
             user_conversations_dir = (
-                f'/workspaces/user_{user_id}/.openhands/conversations'
+                f'/tmp/openhands/user_{user_id}/.openhands/conversations'
             )
             os.makedirs(user_conversations_dir, exist_ok=True)
             conversations_dir = user_conversations_dir
